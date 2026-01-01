@@ -4,6 +4,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import groupRoutes from './routes/groupRoutes';
 import memberRoutes from './routes/memberRoutes';
 import expenseRoutes from './routes/expenseRoutes';
+import balanceRoutes from './routes/balanceRoutes';
 
 const app: Application = express();
 
@@ -32,6 +33,7 @@ app.get('/api', (_req: Request, res: Response) => {
 app.use('/api/groups', groupRoutes);
 app.use('/api', memberRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api', balanceRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFoundHandler);
