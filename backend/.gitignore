@@ -3,3 +3,8 @@ dist/
 
 # Environment
 .env
+
+# Database
+*.db
+*.db-shm
+*.db-wal
