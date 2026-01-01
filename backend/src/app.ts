@@ -1,5 +1,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import groupRoutes from './routes/groupRoutes';
 
 const app: Application = express();
 
@@ -17,7 +19,7 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// API routes will be added here
+// API routes
 app.get('/api', (_req: Request, res: Response) => {
   res.status(200).json({
     message: 'Welcome to Expense Splitter API',
@@ -25,12 +27,10 @@ app.get('/api', (_req: Request, res: Response) => {
   });
 });
 
-// 404 handler
-app.use((_req: Request, res: Response) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: 'The requested endpoint does not exist',
-  });
-});
+app.use('/api/groups', groupRoutes);
+
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
