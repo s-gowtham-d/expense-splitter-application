@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import groupRoutes from './routes/groupRoutes';
+import memberRoutes from './routes/memberRoutes';
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.get('/api', (_req: Request, res: Response) => {
 });
 
 app.use('/api/groups', groupRoutes);
+app.use('/api', memberRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFoundHandler);
