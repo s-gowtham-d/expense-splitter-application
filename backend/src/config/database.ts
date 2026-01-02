@@ -46,6 +46,7 @@ export const initializeDatabase = (): void => {
       group_id TEXT NOT NULL,
       description TEXT NOT NULL,
       amount REAL NOT NULL,
+      currency TEXT DEFAULT 'USD',
       paid_by TEXT NOT NULL,
       split_type TEXT NOT NULL,
       category TEXT DEFAULT 'other',
@@ -58,6 +59,13 @@ export const initializeDatabase = (): void => {
   // Add category column if it doesn't exist (for existing databases)
   try {
     db.exec(`ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT 'other'`);
+  } catch (error) {
+    // Column already exists, ignore error
+  }
+
+  // Add currency column if it doesn't exist (for existing databases)
+  try {
+    db.exec(`ALTER TABLE expenses ADD COLUMN currency TEXT DEFAULT 'USD'`);
   } catch (error) {
     // Column already exists, ignore error
   }

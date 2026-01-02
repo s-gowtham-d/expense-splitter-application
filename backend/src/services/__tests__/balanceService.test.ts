@@ -1,6 +1,6 @@
 import { calculateGroupBalances, calculateSettlements } from '../balanceService';
 import { dataStore } from '../../models';
-import { Group, Member, Expense, SplitType, ExpenseCategory } from '../../types';
+import { Group, Member, Expense, SplitType, ExpenseCategory, Currency } from '../../types';
 
 // Mock the dataStore
 jest.mock('../../models', () => ({
@@ -44,6 +44,7 @@ describe('BalanceService', () => {
             { memberId: 'member2', amount: 30 },
             { memberId: 'member3', amount: 30 },
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },
@@ -86,6 +87,7 @@ describe('BalanceService', () => {
             { memberId: 'member1', amount: 25 },
             { memberId: 'member2', amount: 25 },
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },
@@ -100,6 +102,7 @@ describe('BalanceService', () => {
             { memberId: 'member1', amount: 30 },
             { memberId: 'member2', amount: 30 },
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },
@@ -149,6 +152,7 @@ describe('BalanceService', () => {
             { memberId: 'member1', amount: 60 }, // 60% = $60
             { memberId: 'member2', amount: 40 }, // 40% = $40
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },
@@ -191,6 +195,7 @@ describe('BalanceService', () => {
             { memberId: 'member1', amount: 50 },
             { memberId: 'member2', amount: 50 },
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },
@@ -239,6 +244,7 @@ describe('BalanceService', () => {
             { memberId: 'member2', amount: 30 },
             { memberId: 'member3', amount: 30 },
           ],
+          currency: Currency.USD,
           category: ExpenseCategory.FOOD,
           date: new Date(),
         },

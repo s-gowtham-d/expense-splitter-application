@@ -1,5 +1,5 @@
 import { dataStore } from '../models';
-import { Expense, CreateExpenseRequest, UpdateExpenseRequest, SplitType, SplitDetail, ExpenseCategory } from '../types';
+import { Expense, CreateExpenseRequest, UpdateExpenseRequest, SplitType, SplitDetail, ExpenseCategory, Currency } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { AppError } from '../middleware/errorHandler';
 
@@ -94,6 +94,7 @@ export const createExpense = (data: CreateExpenseRequest): Expense => {
     groupId: data.groupId,
     description: data.description,
     amount: data.amount,
+    currency: data.currency || Currency.USD,
     paidBy: data.paidBy,
     splitType: data.splitType,
     splitBetween,
@@ -140,10 +141,16 @@ export const updateExpense = (id: string, data: UpdateExpenseRequest): Expense =
   if (data.splitType || data.splitBetween || data.amount) {
     const newAmount = data.amount || expense.amount;
     const newSplitType = data.splitType || expense.splitType;
+
+    // Determine which members to split between
+    const membersToSplit = data.splitBetween && data.splitBetween.length > 0
+      ? data.splitBetween.map(s => s.memberId)
+      : expense.splitBetween.map(s => s.memberId);
+
     splitBetween = calculateSplitDetails(
       newAmount,
       newSplitType,
-      group.members,
+      membersToSplit,
       data.splitBetween
     );
   }
@@ -151,6 +158,7 @@ export const updateExpense = (id: string, data: UpdateExpenseRequest): Expense =
   const updatedExpense = dataStore.updateExpense(id, {
     description: data.description,
     amount: data.amount,
+    currency: data.currency,
     paidBy: data.paidBy,
     splitType: data.splitType,
     category: data.category,

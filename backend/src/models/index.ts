@@ -128,14 +128,15 @@ class DataStore {
   // Expense operations
   createExpense(expense: Expense): Expense {
     const stmt = db.prepare(`
-      INSERT INTO expenses (id, group_id, description, amount, paid_by, split_type, category, date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO expenses (id, group_id, description, amount, currency, paid_by, split_type, category, date)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
       expense.id,
       expense.groupId,
       expense.description,
       expense.amount,
+      expense.currency,
       expense.paidBy,
       expense.splitType,
       expense.category,
@@ -166,6 +167,7 @@ class DataStore {
       groupId: row.group_id,
       description: row.description,
       amount: row.amount,
+      currency: row.currency || 'USD',
       paidBy: row.paid_by,
       splitType: row.split_type as SplitType,
       category: row.category,
@@ -189,6 +191,7 @@ class DataStore {
         groupId: row.group_id,
         description: row.description,
         amount: row.amount,
+        currency: row.currency || 'USD',
         paidBy: row.paid_by,
         splitType: row.split_type as SplitType,
         category: row.category,
@@ -216,6 +219,7 @@ class DataStore {
         groupId: row.group_id,
         description: row.description,
         amount: row.amount,
+        currency: row.currency || 'USD',
         paidBy: row.paid_by,
         splitType: row.split_type as SplitType,
         category: row.category,
@@ -236,6 +240,7 @@ class DataStore {
       UPDATE expenses
       SET description = COALESCE(?, description),
           amount = COALESCE(?, amount),
+          currency = COALESCE(?, currency),
           paid_by = COALESCE(?, paid_by),
           split_type = COALESCE(?, split_type),
           category = COALESCE(?, category),
@@ -246,6 +251,7 @@ class DataStore {
     stmt.run(
       updates.description || null,
       updates.amount || null,
+      updates.currency || null,
       updates.paidBy || null,
       updates.splitType || null,
       updates.category || null,
