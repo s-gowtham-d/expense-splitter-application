@@ -5,6 +5,16 @@ export enum SplitType {
   EXACT = 'exact',
 }
 
+export enum ExpenseCategory {
+  FOOD = 'food',
+  TRAVEL = 'travel',
+  UTILITIES = 'utilities',
+  ENTERTAINMENT = 'entertainment',
+  ACCOMMODATION = 'accommodation',
+  SHOPPING = 'shopping',
+  OTHER = 'other',
+}
+
 // Interfaces
 export interface Member {
   id: string;
@@ -33,6 +43,7 @@ export interface Expense {
   paidBy: string; // Member ID
   splitBetween: SplitDetail[];
   splitType: SplitType;
+  category: ExpenseCategory;
   date: Date;
 }
 
@@ -73,6 +84,7 @@ export interface CreateExpenseRequest {
   paidBy: string;
   splitType: SplitType;
   splitBetween?: SplitDetail[]; // Required for percentage and exact types
+  category?: ExpenseCategory;
   date?: string;
 }
 
@@ -82,5 +94,6 @@ export interface UpdateExpenseRequest {
   paidBy?: string;
   splitType?: SplitType;
   splitBetween?: SplitDetail[];
+  category?: ExpenseCategory;
   date?: string;
 }

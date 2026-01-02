@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { api } from '@/api/client';
-import { GroupWithDetails, Balance, Settlement } from '@/types';
+import { GroupWithDetails, Balance, Settlement, ExpenseCategory } from '@/types';
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,6 +49,7 @@ export default function GroupDetailPage() {
     amount: '',
     paidBy: '',
     splitType: 'equal' as 'equal' | 'percentage' | 'exact',
+    category: ExpenseCategory.OTHER,
     splitBetween: [] as string[],
     percentages: {} as Record<string, string>,
     exactAmounts: {} as Record<string, string>,
@@ -205,6 +206,7 @@ export default function GroupDetailPage() {
         amount,
         paidBy: expenseForm.paidBy,
         splitType: expenseForm.splitType,
+        category: expenseForm.category,
         splitDetails,
       });
 
@@ -213,6 +215,7 @@ export default function GroupDetailPage() {
         amount: '',
         paidBy: '',
         splitType: 'equal',
+        category: ExpenseCategory.OTHER,
         splitBetween: [],
         percentages: {},
         exactAmounts: {},
@@ -290,6 +293,7 @@ export default function GroupDetailPage() {
         amount,
         paidBy: expenseForm.paidBy,
         splitType: expenseForm.splitType,
+        category: expenseForm.category,
         splitDetails,
       });
 
@@ -298,6 +302,7 @@ export default function GroupDetailPage() {
         amount: '',
         paidBy: '',
         splitType: 'equal',
+        category: ExpenseCategory.OTHER,
         splitBetween: [],
         percentages: {},
         exactAmounts: {},
@@ -345,6 +350,7 @@ export default function GroupDetailPage() {
       amount: expense.amount.toString(),
       paidBy: expense.paidBy,
       splitType: expense.splitType,
+      category: expense.category || ExpenseCategory.OTHER,
       splitBetween: expense.splitDetails.map((d: any) => d.memberId),
       percentages,
       exactAmounts,
@@ -629,6 +635,28 @@ export default function GroupDetailPage() {
                         </Select>
                       </div>
                       <div className="grid gap-2">
+                        <Label htmlFor="expense-category">Category *</Label>
+                        <Select
+                          value={expenseForm.category}
+                          onValueChange={(value: ExpenseCategory) =>
+                            setExpenseForm({ ...expenseForm, category: value })
+                          }
+                        >
+                          <SelectTrigger id="expense-category">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={ExpenseCategory.FOOD}>Food</SelectItem>
+                            <SelectItem value={ExpenseCategory.TRAVEL}>Travel</SelectItem>
+                            <SelectItem value={ExpenseCategory.UTILITIES}>Utilities</SelectItem>
+                            <SelectItem value={ExpenseCategory.ENTERTAINMENT}>Entertainment</SelectItem>
+                            <SelectItem value={ExpenseCategory.ACCOMMODATION}>Accommodation</SelectItem>
+                            <SelectItem value={ExpenseCategory.SHOPPING}>Shopping</SelectItem>
+                            <SelectItem value={ExpenseCategory.OTHER}>Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
                         <Label>Split Type *</Label>
                         <RadioGroup
                           value={expenseForm.splitType}
@@ -797,6 +825,28 @@ export default function GroupDetailPage() {
                         </Select>
                       </div>
                       <div className="grid gap-2">
+                        <Label htmlFor="edit-expense-category">Category *</Label>
+                        <Select
+                          value={expenseForm.category}
+                          onValueChange={(value: ExpenseCategory) =>
+                            setExpenseForm({ ...expenseForm, category: value })
+                          }
+                        >
+                          <SelectTrigger id="edit-expense-category">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={ExpenseCategory.FOOD}>Food</SelectItem>
+                            <SelectItem value={ExpenseCategory.TRAVEL}>Travel</SelectItem>
+                            <SelectItem value={ExpenseCategory.UTILITIES}>Utilities</SelectItem>
+                            <SelectItem value={ExpenseCategory.ENTERTAINMENT}>Entertainment</SelectItem>
+                            <SelectItem value={ExpenseCategory.ACCOMMODATION}>Accommodation</SelectItem>
+                            <SelectItem value={ExpenseCategory.SHOPPING}>Shopping</SelectItem>
+                            <SelectItem value={ExpenseCategory.OTHER}>Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
                         <Label>Split Type *</Label>
                         <RadioGroup
                           value={expenseForm.splitType}
@@ -934,7 +984,7 @@ export default function GroupDetailPage() {
                       <div className="flex-1">
                         <p className="font-medium">{expense.description}</p>
                         <p className="text-sm text-muted-foreground">
-                          Paid by {payer?.name || 'Unknown'} • {expense.splitType}
+                          Paid by {payer?.name || 'Unknown'} • {expense.splitType} • {expense.category}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(expense.date).toLocaleDateString()}

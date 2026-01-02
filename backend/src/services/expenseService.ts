@@ -1,5 +1,5 @@
 import { dataStore } from '../models';
-import { Expense, CreateExpenseRequest, UpdateExpenseRequest, SplitType, SplitDetail } from '../types';
+import { Expense, CreateExpenseRequest, UpdateExpenseRequest, SplitType, SplitDetail, ExpenseCategory } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { AppError } from '../middleware/errorHandler';
 
@@ -92,6 +92,7 @@ export const createExpense = (data: CreateExpenseRequest): Expense => {
     paidBy: data.paidBy,
     splitType: data.splitType,
     splitBetween,
+    category: data.category || ExpenseCategory.OTHER,
     date: data.date ? new Date(data.date) : new Date(),
   };
 
@@ -147,6 +148,7 @@ export const updateExpense = (id: string, data: UpdateExpenseRequest): Expense =
     amount: data.amount,
     paidBy: data.paidBy,
     splitType: data.splitType,
+    category: data.category,
     date: data.date ? new Date(data.date) : undefined,
     splitBetween,
   });

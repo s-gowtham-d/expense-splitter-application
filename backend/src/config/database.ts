@@ -48,11 +48,19 @@ export const initializeDatabase = (): void => {
       amount REAL NOT NULL,
       paid_by TEXT NOT NULL,
       split_type TEXT NOT NULL,
+      category TEXT DEFAULT 'other',
       date TEXT NOT NULL,
       FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
       FOREIGN KEY (paid_by) REFERENCES members(id)
     )
   `);
+
+  // Add category column if it doesn't exist (for existing databases)
+  try {
+    db.exec(`ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT 'other'`);
+  } catch (error) {
+    // Column already exists, ignore error
+  }
 
   // Split details table
   db.exec(`

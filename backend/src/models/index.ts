@@ -128,8 +128,8 @@ class DataStore {
   // Expense operations
   createExpense(expense: Expense): Expense {
     const stmt = db.prepare(`
-      INSERT INTO expenses (id, group_id, description, amount, paid_by, split_type, date)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO expenses (id, group_id, description, amount, paid_by, split_type, category, date)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
       expense.id,
@@ -138,6 +138,7 @@ class DataStore {
       expense.amount,
       expense.paidBy,
       expense.splitType,
+      expense.category,
       expense.date.toISOString()
     );
 
@@ -167,6 +168,7 @@ class DataStore {
       amount: row.amount,
       paidBy: row.paid_by,
       splitType: row.split_type as SplitType,
+      category: row.category,
       splitBetween: splits.map(s => ({
         memberId: s.member_id,
         amount: s.amount,
@@ -189,6 +191,7 @@ class DataStore {
         amount: row.amount,
         paidBy: row.paid_by,
         splitType: row.split_type as SplitType,
+        category: row.category,
         splitBetween: splits.map(s => ({
           memberId: s.member_id,
           amount: s.amount,
@@ -215,6 +218,7 @@ class DataStore {
         amount: row.amount,
         paidBy: row.paid_by,
         splitType: row.split_type as SplitType,
+        category: row.category,
         splitBetween: splits.map(s => ({
           memberId: s.member_id,
           amount: s.amount,
@@ -234,6 +238,7 @@ class DataStore {
           amount = COALESCE(?, amount),
           paid_by = COALESCE(?, paid_by),
           split_type = COALESCE(?, split_type),
+          category = COALESCE(?, category),
           date = COALESCE(?, date)
       WHERE id = ?
     `);
@@ -243,6 +248,7 @@ class DataStore {
       updates.amount || null,
       updates.paidBy || null,
       updates.splitType || null,
+      updates.category || null,
       updates.date ? new Date(updates.date).toISOString() : null,
       id
     );

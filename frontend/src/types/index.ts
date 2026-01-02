@@ -4,6 +4,16 @@ export enum SplitType {
   EXACT = 'exact',
 }
 
+export enum ExpenseCategory {
+  FOOD = 'food',
+  TRAVEL = 'travel',
+  UTILITIES = 'utilities',
+  ENTERTAINMENT = 'entertainment',
+  ACCOMMODATION = 'accommodation',
+  SHOPPING = 'shopping',
+  OTHER = 'other',
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -31,6 +41,7 @@ export interface Expense {
   paidBy: string;
   splitBetween: SplitDetail[];
   splitType: SplitType;
+  category: ExpenseCategory;
   date: string;
 }
 
