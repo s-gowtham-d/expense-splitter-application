@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import authRoutes from './routes/authRoutes';
 import groupRoutes from './routes/groupRoutes';
 import memberRoutes from './routes/memberRoutes';
 import expenseRoutes from './routes/expenseRoutes';
@@ -30,6 +31,7 @@ app.get('/api', (_req: Request, res: Response) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api', memberRoutes);
 app.use('/api/expenses', expenseRoutes);

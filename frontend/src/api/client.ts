@@ -1,30 +1,48 @@
-const API_BASE_URL = '/api';
+import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types';
 
-interface ApiResponse<T> {
-  status: string;
-  data: T;
-}
+const API_BASE_URL = '/api';
+const TOKEN_KEY = 'auth_token';
+
+// Token management
+export const tokenManager = {
+  getToken: (): string | null => {
+    return localStorage.getItem(TOKEN_KEY);
+  },
+  setToken: (token: string): void => {
+    localStorage.setItem(TOKEN_KEY, token);
+  },
+  removeToken: (): void => {
+    localStorage.removeItem(TOKEN_KEY);
+  },
+};
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = tokenManager.getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string> || {}),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
     ...options,
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    throw new Error(error.message || error.error || `HTTP error! status: ${response.status}`);
   }
 
   if (response.status === 204) {
     return {} as T;
   }
 
-  const result: ApiResponse<T> = await response.json();
-  return result.data;
+  const result = await response.json();
+  return result.data || result;
 }
 
 export const api = {
@@ -84,5 +102,24 @@ export const api = {
       fetchApi<void>(`/expenses/${id}`, {
         method: 'DELETE',
       }),
+  },
+
+  // Authentication
+  auth: {
+    register: (data: RegisterRequest) =>
+      fetchApi<AuthResponse>('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    login: (data: LoginRequest) =>
+      fetchApi<AuthResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    getMe: () =>
+      fetchApi<{ user: User }>('/auth/me'),
+    logout: () => {
+      tokenManager.removeToken();
+    },
   },
 };

@@ -1,7 +1,48 @@
 import db from '../config/database';
-import { Group, Member, Expense, SplitType } from '../types';
+import { User, Group, Member, Expense, SplitType } from '../types';
 
 class DataStore {
+  // User operations
+  createUser(user: User): User {
+    const stmt = db.prepare(`
+      INSERT INTO users (id, email, name, password_hash, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(user.id, user.email, user.name, user.passwordHash, user.createdAt.toISOString());
+    return user;
+  }
+
+  getUserByEmail(email: string): User | undefined {
+    const row = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
+    if (!row) return undefined;
+
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      passwordHash: row.password_hash,
+      createdAt: new Date(row.created_at),
+    };
+  }
+
+  getUserById(id: string): User | undefined {
+    const row = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+    if (!row) return undefined;
+
+    return {
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      passwordHash: row.password_hash,
+      createdAt: new Date(row.created_at),
+    };
+  }
+
+  userExists(email: string): boolean {
+    const row = db.prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1').get(email);
+    return !!row;
+  }
+
   // Group operations
   createGroup(group: Group): Group {
     const stmt = db.prepare(`
@@ -316,6 +357,7 @@ class DataStore {
     db.prepare('DELETE FROM group_members').run();
     db.prepare('DELETE FROM members').run();
     db.prepare('DELETE FROM groups').run();
+    db.prepare('DELETE FROM users').run();
   }
 }
 

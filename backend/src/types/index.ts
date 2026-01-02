@@ -28,6 +28,14 @@ export enum Currency {
 }
 
 // Interfaces
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  createdAt: Date;
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -111,4 +119,24 @@ export interface UpdateExpenseRequest {
   splitBetween?: SplitDetail[];
   category?: ExpenseCategory;
   date?: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
 }
