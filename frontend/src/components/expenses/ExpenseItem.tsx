@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Expense, Member } from '@/types';
+import { formatCurrency } from '@/lib/currency';
 
 interface ExpenseItemProps {
   expense: Expense;
@@ -24,7 +25,7 @@ export function ExpenseItem({ expense, members, onEdit, onDelete }: ExpenseItemP
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <p className="text-lg font-bold">${expense.amount.toFixed(2)}</p>
+        <p className="text-lg font-bold">{formatCurrency(expense.amount, expense.currency)}</p>
         <div className="flex gap-1">
           <Button
             size="sm"

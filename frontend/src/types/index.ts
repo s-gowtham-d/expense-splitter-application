@@ -14,6 +14,18 @@ export enum ExpenseCategory {
   OTHER = 'other',
 }
 
+export enum Currency {
+  USD = 'USD',
+  EUR = 'EUR',
+  GBP = 'GBP',
+  INR = 'INR',
+  JPY = 'JPY',
+  AUD = 'AUD',
+  CAD = 'CAD',
+  CHF = 'CHF',
+  CNY = 'CNY',
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -38,6 +50,7 @@ export interface Expense {
   groupId: string;
   description: string;
   amount: number;
+  currency: Currency;
   paidBy: string;
   splitBetween: SplitDetail[];
   splitType: SplitType;

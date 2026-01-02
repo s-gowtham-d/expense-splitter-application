@@ -18,11 +18,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Member, ExpenseCategory, Expense } from '@/types';
+import { Member, ExpenseCategory, Currency, Expense } from '@/types';
+import { currencyNames, currencySymbols } from '@/lib/currency';
 
 interface ExpenseFormData {
   description: string;
   amount: string;
+  currency: Currency;
   paidBy: string;
   splitType: 'equal' | 'percentage' | 'exact';
   category: ExpenseCategory;
@@ -51,6 +53,7 @@ export function ExpenseFormDialog({
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     amount: '',
+    currency: Currency.USD,
     paidBy: '',
     splitType: 'equal',
     category: ExpenseCategory.OTHER,
@@ -74,12 +77,18 @@ export function ExpenseFormDialog({
         }
       });
 
+      // Ensure category is a valid ExpenseCategory value
+      const validCategory = expense.category && Object.values(ExpenseCategory).includes(expense.category as ExpenseCategory)
+        ? (expense.category as ExpenseCategory)
+        : ExpenseCategory.OTHER;
+
       setFormData({
         description: expense.description,
         amount: expense.amount.toString(),
+        currency: expense.currency || Currency.USD,
         paidBy: expense.paidBy,
         splitType: expense.splitType as 'equal' | 'percentage' | 'exact',
-        category: expense.category || ExpenseCategory.OTHER,
+        category: validCategory,
         splitBetween: expense.splitBetween.map((d) => d.memberId),
         percentages,
         exactAmounts,
@@ -93,6 +102,7 @@ export function ExpenseFormDialog({
       setFormData({
         description: '',
         amount: '',
+        currency: Currency.USD,
         paidBy: '',
         splitType: 'equal',
         category: ExpenseCategory.OTHER,
@@ -203,6 +213,26 @@ export function ExpenseFormDialog({
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="expense-currency">Currency *</Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, currency: value as Currency })
+                }
+              >
+                <SelectTrigger id="expense-currency">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(Currency).map((curr) => (
+                    <SelectItem key={curr} value={curr}>
+                      {currencySymbols[curr]} {curr} - {currencyNames[curr]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="expense-paidby">Paid By *</Label>
               <Select
                 value={formData.paidBy}
@@ -226,8 +256,8 @@ export function ExpenseFormDialog({
               <Label htmlFor="expense-category">Category *</Label>
               <Select
                 value={formData.category}
-                onValueChange={(value: ExpenseCategory) =>
-                  setFormData({ ...formData, category: value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value as ExpenseCategory })
                 }
               >
                 <SelectTrigger id="expense-category">

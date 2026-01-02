@@ -11,7 +11,7 @@ import {
 import { ExpenseFilters } from './ExpenseFilters';
 import { ExpensesList } from './ExpensesList';
 import { ExpenseFormDialog } from './ExpenseFormDialog';
-import { Expense, Member, ExpenseCategory } from '@/types';
+import { Expense, Member } from '@/types';
 
 interface ExpensesCardProps {
   expenses: Expense[];
@@ -126,8 +126,11 @@ export function ExpensesCard({
     let splitBetween;
 
     if (formData.splitType === 'equal') {
-      // For equal split, backend will calculate, just send member IDs
-      splitBetween = undefined;
+      // For equal split, send member IDs with placeholder amounts (backend will calculate)
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
+        memberId,
+        amount: 0, // Placeholder, backend will calculate
+      }));
     } else if (formData.splitType === 'percentage') {
       // For percentage, send percentage values (not calculated amounts)
       splitBetween = formData.splitBetween.map((memberId: string) => ({
@@ -145,6 +148,7 @@ export function ExpensesCard({
     await onAddExpense({
       description: formData.description,
       amount,
+      currency: formData.currency,
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,
@@ -159,8 +163,11 @@ export function ExpensesCard({
     let splitBetween;
 
     if (formData.splitType === 'equal') {
-      // For equal split, backend will calculate, just send member IDs
-      splitBetween = undefined;
+      // For equal split, send member IDs with placeholder amounts (backend will calculate)
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
+        memberId,
+        amount: 0, // Placeholder, backend will calculate
+      }));
     } else if (formData.splitType === 'percentage') {
       // For percentage, send percentage values (not calculated amounts)
       splitBetween = formData.splitBetween.map((memberId: string) => ({
@@ -178,6 +185,7 @@ export function ExpensesCard({
     await onUpdateExpense(editingExpense.id, {
       description: formData.description,
       amount,
+      currency: formData.currency,
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,
