@@ -291,6 +291,26 @@ class DataStore {
     const row = db.prepare('SELECT 1 FROM expenses WHERE id = ? LIMIT 1').get(id);
     return !!row;
   }
+
+  // Group-Member relationship operations
+  addMemberToGroup(groupId: string, memberId: string): void {
+    const stmt = db.prepare('INSERT INTO group_members (group_id, member_id) VALUES (?, ?)');
+    stmt.run(groupId, memberId);
+  }
+
+  removeMemberFromGroup(groupId: string, memberId: string): void {
+    const stmt = db.prepare('DELETE FROM group_members WHERE group_id = ? AND member_id = ?');
+    stmt.run(groupId, memberId);
+  }
+
+  // Test utility method to clear all data
+  clearAll(): void {
+    db.prepare('DELETE FROM split_details').run();
+    db.prepare('DELETE FROM expenses').run();
+    db.prepare('DELETE FROM group_members').run();
+    db.prepare('DELETE FROM members').run();
+    db.prepare('DELETE FROM groups').run();
+  }
 }
 
 export const dataStore = new DataStore();
