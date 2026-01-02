@@ -70,10 +70,15 @@ export const createExpense = (data: CreateExpenseRequest): Expense => {
   }
 
   // Calculate split details
+  // For equal split, use all group members if splitBetween not provided
+  const membersToSplit = data.splitBetween && data.splitBetween.length > 0
+    ? data.splitBetween.map(s => s.memberId)
+    : group.members;
+
   const splitBetween = calculateSplitDetails(
     data.amount,
     data.splitType,
-    group.members,
+    membersToSplit,
     data.splitBetween
   );
 

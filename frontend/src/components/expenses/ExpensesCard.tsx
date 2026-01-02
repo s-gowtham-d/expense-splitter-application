@@ -123,20 +123,20 @@ export function ExpensesCard({
 
   const handleAddSubmit = async (formData: any) => {
     const amount = parseFloat(formData.amount);
-    let splitDetails;
+    let splitBetween;
 
     if (formData.splitType === 'equal') {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
-        memberId,
-        amount: amount / formData.splitBetween.length,
-      }));
+      // For equal split, backend will calculate, just send member IDs
+      splitBetween = undefined;
     } else if (formData.splitType === 'percentage') {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
+      // For percentage, send percentage values (not calculated amounts)
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
         memberId,
-        amount: (amount * parseFloat(formData.percentages[memberId] || '0')) / 100,
+        amount: parseFloat(formData.percentages[memberId] || '0'),
       }));
     } else {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
+      // For exact, send exact amounts
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
         memberId,
         amount: parseFloat(formData.exactAmounts[memberId] || '0'),
       }));
@@ -148,7 +148,7 @@ export function ExpensesCard({
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,
-      splitDetails,
+      splitBetween,
     });
   };
 
@@ -156,20 +156,20 @@ export function ExpensesCard({
     if (!editingExpense) return;
 
     const amount = parseFloat(formData.amount);
-    let splitDetails;
+    let splitBetween;
 
     if (formData.splitType === 'equal') {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
-        memberId,
-        amount: amount / formData.splitBetween.length,
-      }));
+      // For equal split, backend will calculate, just send member IDs
+      splitBetween = undefined;
     } else if (formData.splitType === 'percentage') {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
+      // For percentage, send percentage values (not calculated amounts)
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
         memberId,
-        amount: (amount * parseFloat(formData.percentages[memberId] || '0')) / 100,
+        amount: parseFloat(formData.percentages[memberId] || '0'),
       }));
     } else {
-      splitDetails = formData.splitBetween.map((memberId: string) => ({
+      // For exact, send exact amounts
+      splitBetween = formData.splitBetween.map((memberId: string) => ({
         memberId,
         amount: parseFloat(formData.exactAmounts[memberId] || '0'),
       }));
@@ -181,7 +181,7 @@ export function ExpensesCard({
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,
-      splitDetails,
+      splitBetween,
     });
     setEditingExpense(null);
   };
