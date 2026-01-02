@@ -849,6 +849,7 @@ export default function GroupDetailPage() {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
               <Dialog open={editExpenseOpen} onOpenChange={setEditExpenseOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <form onSubmit={handleEditExpense}>
@@ -1042,7 +1043,6 @@ export default function GroupDetailPage() {
                   </form>
                 </DialogContent>
               </Dialog>
-            </div>
           </CardHeader>
           <CardContent>
             {group.expenses.length > 0 && (
