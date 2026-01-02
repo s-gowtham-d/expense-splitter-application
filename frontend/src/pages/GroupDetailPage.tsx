@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, UserPlus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, Trash2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -42,6 +42,8 @@ export default function GroupDetailPage() {
   const [memberForm, setMemberForm] = useState({ name: '', email: '' });
   const [addingMember, setAddingMember] = useState(false);
   const [addExpenseOpen, setAddExpenseOpen] = useState(false);
+  const [editExpenseOpen, setEditExpenseOpen] = useState(false);
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [expenseForm, setExpenseForm] = useState({
     description: '',
     amount: '',
@@ -225,6 +227,130 @@ export default function GroupDetailPage() {
     } finally {
       setAddingExpense(false);
     }
+  };
+
+  const handleEditExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !editingExpenseId || !expenseForm.description.trim() || !expenseForm.amount || !expenseForm.paidBy) {
+      return;
+    }
+
+    if (expenseForm.splitBetween.length === 0) {
+      alert('Please select at least one member to split the expense');
+      return;
+    }
+
+    try {
+      setAddingExpense(true);
+
+      const amount = parseFloat(expenseForm.amount);
+
+      // Build split details based on split type
+      let splitDetails;
+      if (expenseForm.splitType === 'equal') {
+        splitDetails = expenseForm.splitBetween.map(memberId => ({
+          memberId,
+          amount: amount / expenseForm.splitBetween.length,
+        }));
+      } else if (expenseForm.splitType === 'percentage') {
+        const totalPercentage = expenseForm.splitBetween.reduce(
+          (sum, memberId) => sum + (parseFloat(expenseForm.percentages[memberId] || '0')),
+          0
+        );
+
+        if (Math.abs(totalPercentage - 100) > 0.01) {
+          alert('Percentages must add up to 100%');
+          return;
+        }
+
+        splitDetails = expenseForm.splitBetween.map(memberId => ({
+          memberId,
+          amount: (amount * parseFloat(expenseForm.percentages[memberId] || '0')) / 100,
+        }));
+      } else {
+        const totalAmount = expenseForm.splitBetween.reduce(
+          (sum, memberId) => sum + (parseFloat(expenseForm.exactAmounts[memberId] || '0')),
+          0
+        );
+
+        if (Math.abs(totalAmount - amount) > 0.01) {
+          alert(`Exact amounts must add up to $${amount.toFixed(2)}`);
+          return;
+        }
+
+        splitDetails = expenseForm.splitBetween.map(memberId => ({
+          memberId,
+          amount: parseFloat(expenseForm.exactAmounts[memberId] || '0'),
+        }));
+      }
+
+      await api.expenses.update(editingExpenseId, {
+        groupId: id,
+        description: expenseForm.description,
+        amount,
+        paidBy: expenseForm.paidBy,
+        splitType: expenseForm.splitType,
+        splitDetails,
+      });
+
+      setExpenseForm({
+        description: '',
+        amount: '',
+        paidBy: '',
+        splitType: 'equal',
+        splitBetween: [],
+        percentages: {},
+        exactAmounts: {},
+      });
+      setEditExpenseOpen(false);
+      setEditingExpenseId(null);
+
+      // Reload group data
+      await loadGroupData();
+    } catch (error) {
+      console.error('Failed to update expense:', error);
+      alert('Failed to update expense. Please try again.');
+    } finally {
+      setAddingExpense(false);
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (!confirm('Are you sure you want to delete this expense?')) return;
+
+    try {
+      await api.expenses.delete(expenseId);
+      await loadGroupData();
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+      alert('Failed to delete expense. Please try again.');
+    }
+  };
+
+  const handleOpenEditExpense = (expense: any) => {
+    // Populate form with expense data
+    const percentages: Record<string, string> = {};
+    const exactAmounts: Record<string, string> = {};
+
+    expense.splitDetails.forEach((detail: any) => {
+      if (expense.splitType === 'percentage') {
+        percentages[detail.memberId] = ((detail.amount / expense.amount) * 100).toFixed(2);
+      } else if (expense.splitType === 'exact') {
+        exactAmounts[detail.memberId] = detail.amount.toFixed(2);
+      }
+    });
+
+    setExpenseForm({
+      description: expense.description,
+      amount: expense.amount.toString(),
+      paidBy: expense.paidBy,
+      splitType: expense.splitType,
+      splitBetween: expense.splitDetails.map((d: any) => d.memberId),
+      percentages,
+      exactAmounts,
+    });
+    setEditingExpenseId(expense.id);
+    setEditExpenseOpen(true);
   };
 
   if (loading) {
@@ -613,6 +739,177 @@ export default function GroupDetailPage() {
                   </form>
                 </DialogContent>
               </Dialog>
+              <Dialog open={editExpenseOpen} onOpenChange={setEditExpenseOpen}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <form onSubmit={handleEditExpense}>
+                    <DialogHeader>
+                      <DialogTitle>Edit Expense</DialogTitle>
+                      <DialogDescription>
+                        Update the expense details
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-expense-description">Description *</Label>
+                        <Input
+                          id="edit-expense-description"
+                          placeholder="Dinner at restaurant"
+                          value={expenseForm.description}
+                          onChange={(e) =>
+                            setExpenseForm({ ...expenseForm, description: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-expense-amount">Amount *</Label>
+                        <Input
+                          id="edit-expense-amount"
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          placeholder="0.00"
+                          value={expenseForm.amount}
+                          onChange={(e) =>
+                            setExpenseForm({ ...expenseForm, amount: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-expense-paidby">Paid By *</Label>
+                        <Select
+                          value={expenseForm.paidBy}
+                          onValueChange={(value) =>
+                            setExpenseForm({ ...expenseForm, paidBy: value })
+                          }
+                        >
+                          <SelectTrigger id="edit-expense-paidby">
+                            <SelectValue placeholder="Select member" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {group.members.map((member) => (
+                              <SelectItem key={member.id} value={member.id}>
+                                {member.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Split Type *</Label>
+                        <RadioGroup
+                          value={expenseForm.splitType}
+                          onValueChange={(value: 'equal' | 'percentage' | 'exact') =>
+                            setExpenseForm({ ...expenseForm, splitType: value })
+                          }
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="equal" id="edit-split-equal" />
+                            <Label htmlFor="edit-split-equal" className="font-normal cursor-pointer">
+                              Equal - Split equally among selected members
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="percentage" id="edit-split-percentage" />
+                            <Label htmlFor="edit-split-percentage" className="font-normal cursor-pointer">
+                              Percentage - Split by custom percentages
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="exact" id="edit-split-exact" />
+                            <Label htmlFor="edit-split-exact" className="font-normal cursor-pointer">
+                              Exact - Specify exact amounts for each member
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Split Between * (Select members)</Label>
+                        <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
+                          {group.members.map((member) => {
+                            const isSelected = expenseForm.splitBetween.includes(member.id);
+                            return (
+                              <div key={member.id} className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`edit-member-${member.id}`}
+                                    checked={isSelected}
+                                    onChange={() => handleToggleMemberForSplit(member.id)}
+                                    className="h-4 w-4 rounded border-gray-300"
+                                  />
+                                  <Label
+                                    htmlFor={`edit-member-${member.id}`}
+                                    className="font-normal cursor-pointer flex-1"
+                                  >
+                                    {member.name}
+                                  </Label>
+                                  {isSelected && expenseForm.splitType === 'percentage' && (
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      max="100"
+                                      placeholder="%"
+                                      className="w-20"
+                                      value={expenseForm.percentages[member.id] || ''}
+                                      onChange={(e) =>
+                                        setExpenseForm({
+                                          ...expenseForm,
+                                          percentages: {
+                                            ...expenseForm.percentages,
+                                            [member.id]: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  )}
+                                  {isSelected && expenseForm.splitType === 'exact' && (
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0.00"
+                                      className="w-24"
+                                      value={expenseForm.exactAmounts[member.id] || ''}
+                                      onChange={(e) =>
+                                        setExpenseForm({
+                                          ...expenseForm,
+                                          exactAmounts: {
+                                            ...expenseForm.exactAmounts,
+                                            [member.id]: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setEditExpenseOpen(false);
+                          setEditingExpenseId(null);
+                        }}
+                        disabled={addingExpense}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={addingExpense}>
+                        {addingExpense ? 'Updating...' : 'Update Expense'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
@@ -634,7 +931,7 @@ export default function GroupDetailPage() {
                       key={expense.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">{expense.description}</p>
                         <p className="text-sm text-muted-foreground">
                           Paid by {payer?.name || 'Unknown'} • {expense.splitType}
@@ -643,7 +940,25 @@ export default function GroupDetailPage() {
                           {new Date(expense.date).toLocaleDateString()}
                         </p>
                       </div>
-                      <p className="text-lg font-bold">${expense.amount.toFixed(2)}</p>
+                      <div className="flex items-center gap-3">
+                        <p className="text-lg font-bold">${expense.amount.toFixed(2)}</p>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleOpenEditExpense(expense)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteExpense(expense.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
