@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, PieChart } from 'lucide-react';
+import { Users, DollarSign, PieChart, BarChart3 } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -12,9 +12,17 @@ export default function HomePage() {
           <p className="text-xl text-muted-foreground mb-8">
             Split expenses easily with friends and family
           </p>
-          <Link to="/groups">
-            <Button size="lg">Get Started</Button>
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link to="/groups">
+              <Button size="lg">Get Started</Button>
+            </Link>
+            <Link to="/dashboard">
+              <Button size="lg" variant="outline">
+                <BarChart3 className="mr-2 h-5 w-5" />
+                View Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
