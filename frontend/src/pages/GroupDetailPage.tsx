@@ -55,6 +55,9 @@ export default function GroupDetailPage() {
     exactAmounts: {} as Record<string, string>,
   });
   const [addingExpense, setAddingExpense] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterMember, setFilterMember] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
 
   useEffect(() => {
     if (id) {
@@ -357,6 +360,27 @@ export default function GroupDetailPage() {
     });
     setEditingExpenseId(expense.id);
     setEditExpenseOpen(true);
+  };
+
+  const getFilteredExpenses = () => {
+    if (!group) return [];
+
+    return group.expenses.filter((expense) => {
+      // Search filter
+      const matchesSearch = searchQuery === '' ||
+        expense.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Member filter
+      const matchesMember = filterMember === 'all' ||
+        expense.paidBy === filterMember ||
+        expense.splitBetween.some(split => split.memberId === filterMember);
+
+      // Category filter
+      const matchesCategory = filterCategory === 'all' ||
+        expense.category === filterCategory;
+
+      return matchesSearch && matchesMember && matchesCategory;
+    });
   };
 
   if (loading) {
@@ -963,6 +987,52 @@ export default function GroupDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {group.expenses.length > 0 && (
+              <div className="mb-4 space-y-3">
+                <Input
+                  placeholder="Search expenses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Filter by Member</Label>
+                    <Select value={filterMember} onValueChange={setFilterMember}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Members</SelectItem>
+                        {group.members.map((member) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            {member.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Filter by Category</Label>
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value={ExpenseCategory.FOOD}>Food</SelectItem>
+                        <SelectItem value={ExpenseCategory.TRAVEL}>Travel</SelectItem>
+                        <SelectItem value={ExpenseCategory.UTILITIES}>Utilities</SelectItem>
+                        <SelectItem value={ExpenseCategory.ENTERTAINMENT}>Entertainment</SelectItem>
+                        <SelectItem value={ExpenseCategory.ACCOMMODATION}>Accommodation</SelectItem>
+                        <SelectItem value={ExpenseCategory.SHOPPING}>Shopping</SelectItem>
+                        <SelectItem value={ExpenseCategory.OTHER}>Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
             {group.expenses.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-2">No expenses yet</p>
@@ -973,8 +1043,14 @@ export default function GroupDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {group.expenses.map((expense) => {
+              <>
+                {getFilteredExpenses().length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No expenses match your filters</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {getFilteredExpenses().map((expense) => {
                   const payer = group.members.find(m => m.id === expense.paidBy);
                   return (
                     <div
@@ -1010,9 +1086,11 @@ export default function GroupDetailPage() {
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
