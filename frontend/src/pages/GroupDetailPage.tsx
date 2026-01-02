@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, UserPlus, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, Trash2, Pencil, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -383,6 +383,53 @@ export default function GroupDetailPage() {
     });
   };
 
+  const handleExportCSV = () => {
+    if (!group) return;
+
+    const expenses = getFilteredExpenses();
+
+    // CSV headers
+    const headers = ['Date', 'Description', 'Amount', 'Category', 'Paid By', 'Split Type', 'Split Details'];
+
+    // CSV rows
+    const rows = expenses.map(expense => {
+      const payer = group.members.find(m => m.id === expense.paidBy);
+      const splitDetails = expense.splitBetween
+        .map(split => {
+          const member = group.members.find(m => m.id === split.memberId);
+          return `${member?.name}: $${split.amount.toFixed(2)}`;
+        })
+        .join('; ');
+
+      return [
+        new Date(expense.date).toLocaleDateString(),
+        expense.description,
+        `$${expense.amount.toFixed(2)}`,
+        expense.category,
+        payer?.name || 'Unknown',
+        expense.splitType,
+        splitDetails
+      ];
+    });
+
+    // Create CSV content
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${group.name}-expenses-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -595,13 +642,24 @@ export default function GroupDetailPage() {
                 <CardTitle>Expenses</CardTitle>
                 <CardDescription>Track shared expenses</CardDescription>
               </div>
-              <Dialog open={addExpenseOpen} onOpenChange={setAddExpenseOpen}>
-                <DialogTrigger asChild>
-                  <Button disabled={group.members.length === 0}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Expense
+              <div className="flex gap-2">
+                {group.expenses.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="default"
+                    onClick={handleExportCSV}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export CSV
                   </Button>
-                </DialogTrigger>
+                )}
+                <Dialog open={addExpenseOpen} onOpenChange={setAddExpenseOpen}>
+                  <DialogTrigger asChild>
+                    <Button disabled={group.members.length === 0}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Expense
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <form onSubmit={handleAddExpense}>
                     <DialogHeader>
