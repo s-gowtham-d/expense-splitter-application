@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { api, tokenManager } from '@/api/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +22,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await api.auth.login(formData);
-      tokenManager.setToken(response.token);
+      await login(formData.email, formData.password);
       navigate('/groups');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

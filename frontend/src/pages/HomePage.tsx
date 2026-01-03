@@ -1,27 +1,65 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, PieChart, BarChart3 } from 'lucide-react';
+import { Users, DollarSign, PieChart, BarChart3, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
+        {isAuthenticated && (
+          <div className="flex justify-end mb-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">
+                Welcome, {user?.name}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4">Expense Splitter</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Split expenses easily with friends and family
           </p>
           <div className="flex gap-4 justify-center">
-            <Link to="/groups">
-              <Button size="lg">Get Started</Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button size="lg" variant="outline">
-                <BarChart3 className="mr-2 h-5 w-5" />
-                View Dashboard
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link to="/groups">
+                  <Button size="lg">Go to Groups</Button>
+                </Link>
+                <Link to="/dashboard">
+                  <Button size="lg" variant="outline">
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    View Dashboard
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button size="lg">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="lg" variant="outline">
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

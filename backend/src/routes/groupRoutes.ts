@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as groupController from '../controllers/groupController';
 import { asyncHandler } from '../middleware/errorHandler';
 import { validate } from '../middleware/validator';
+import { authenticate } from '../middleware/auth';
 import {
   createGroupValidators,
   updateGroupValidators,
@@ -9,6 +10,9 @@ import {
 } from '../validators/groupValidators';
 
 const router = Router();
+
+// All group routes require authentication
+router.use(authenticate);
 
 // Group CRUD operations
 router.post(

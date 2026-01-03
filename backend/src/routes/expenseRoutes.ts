@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as expenseController from '../controllers/expenseController';
 import { asyncHandler } from '../middleware/errorHandler';
 import { validate } from '../middleware/validator';
+import { authenticate } from '../middleware/auth';
 import {
   createExpenseValidators,
   updateExpenseValidators,
@@ -10,6 +11,9 @@ import {
 } from '../validators/expenseValidators';
 
 const router = Router();
+
+// All expense routes require authentication
+router.use(authenticate);
 
 // Expense CRUD operations
 router.post(
