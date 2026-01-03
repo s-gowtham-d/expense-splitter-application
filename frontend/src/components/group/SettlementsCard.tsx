@@ -33,7 +33,7 @@ export function SettlementsCard({ settlements }: SettlementsCardProps) {
                   <span className="font-semibold">{settlement.toName}</span>
                 </p>
                 <p className="text-lg font-bold text-primary mt-1">
-                  ${settlement.amount.toFixed(2)}
+                  ₹{settlement.amount.toFixed(2)}
                 </p>
               </div>
             ))}
