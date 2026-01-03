@@ -18,13 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Member, ExpenseCategory, Currency, Expense } from '@/types';
-import { currencyNames, currencySymbols } from '@/lib/currency';
+import { Member, ExpenseCategory, Expense } from '@/types';
 
 interface ExpenseFormData {
   description: string;
   amount: string;
-  currency: Currency;
   paidBy: string;
   splitType: 'equal' | 'percentage' | 'exact';
   category: ExpenseCategory;
@@ -53,7 +51,6 @@ export function ExpenseFormDialog({
   const [formData, setFormData] = useState<ExpenseFormData>({
     description: '',
     amount: '',
-    currency: Currency.USD,
     paidBy: '',
     splitType: 'equal',
     category: ExpenseCategory.OTHER,
@@ -85,7 +82,6 @@ export function ExpenseFormDialog({
       setFormData({
         description: expense.description,
         amount: expense.amount.toString(),
-        currency: expense.currency || Currency.USD,
         paidBy: expense.paidBy,
         splitType: expense.splitType as 'equal' | 'percentage' | 'exact',
         category: validCategory,
@@ -102,7 +98,6 @@ export function ExpenseFormDialog({
       setFormData({
         description: '',
         amount: '',
-        currency: Currency.USD,
         paidBy: '',
         splitType: 'equal',
         category: ExpenseCategory.OTHER,
@@ -155,7 +150,7 @@ export function ExpenseFormDialog({
         0
       );
       if (Math.abs(totalAmount - parseFloat(formData.amount)) > 0.01) {
-        alert(`Exact amounts must add up to $${parseFloat(formData.amount).toFixed(2)}`);
+        alert(`Exact amounts must add up to ₹${parseFloat(formData.amount).toFixed(2)}`);
         return;
       }
     }
@@ -211,26 +206,6 @@ export function ExpenseFormDialog({
                 }
                 required
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="expense-currency">Currency *</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, currency: value as Currency })
-                }
-              >
-                <SelectTrigger id="expense-currency">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(Currency).map((curr) => (
-                    <SelectItem key={curr} value={curr}>
-                      {currencySymbols[curr]} {curr} - {currencyNames[curr]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="expense-paidby">Paid By *</Label>

@@ -11,7 +11,7 @@ import {
 import { ExpenseFilters } from './ExpenseFilters';
 import { ExpensesList } from './ExpensesList';
 import { ExpenseFormDialog } from './ExpenseFormDialog';
-import { Expense, Member } from '@/types';
+import { Expense, Member, Currency } from '@/types';
 
 interface ExpensesCardProps {
   expenses: Expense[];
@@ -75,14 +75,14 @@ export function ExpensesCard({
       const splitDetails = expense.splitBetween
         .map((split) => {
           const member = members.find((m) => m.id === split.memberId);
-          return `${member?.name}: $${split.amount.toFixed(2)}`;
+          return `${member?.name}: ₹${split.amount.toFixed(2)}`;
         })
         .join('; ');
 
       return [
         new Date(expense.date).toLocaleDateString(),
         expense.description,
-        `$${expense.amount.toFixed(2)}`,
+        `₹${expense.amount.toFixed(2)}`,
         expense.category,
         payer?.name || 'Unknown',
         expense.splitType,
@@ -148,7 +148,7 @@ export function ExpensesCard({
     await onAddExpense({
       description: formData.description,
       amount,
-      currency: formData.currency,
+      currency: Currency.INR,
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,
@@ -185,7 +185,7 @@ export function ExpensesCard({
     await onUpdateExpense(editingExpense.id, {
       description: formData.description,
       amount,
-      currency: formData.currency,
+      currency: Currency.INR,
       paidBy: formData.paidBy,
       splitType: formData.splitType,
       category: formData.category,

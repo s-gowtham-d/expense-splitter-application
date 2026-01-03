@@ -32,7 +32,6 @@ export default function DashboardPage() {
   // Calculate stats
   const totalExpenses = expenses.length;
   const totalAmount = expenses.reduce((sum, exp) => {
-    // Convert all to USD for total (simplified)
     return sum + exp.amount;
   }, 0);
   const uniqueMembers = new Set(expenses.map(e => e.paidBy)).size;
@@ -79,7 +78,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(totalAmount, Currency.USD)}
+                {formatCurrency(totalAmount, Currency.INR)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Combined spending
@@ -107,7 +106,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(averageExpense, Currency.USD)}
+                {formatCurrency(averageExpense, Currency.INR)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Per expense

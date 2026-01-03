@@ -1,14 +1,20 @@
 # Expense Splitter Application
 
-A full-stack web application for managing shared expenses among group members. Split bills easily using equal, percentage-based, or exact amount distribution methods with automatic settlement calculations.
+A full-stack web application for managing shared expenses among group members. Split bills easily using equal, percentage-based, or exact amount distribution methods with automatic settlement calculations. All expenses are tracked in Indian Rupees (INR).
+
+> **Note**: This project was developed with assistance from AI tools (Claude Code) to accelerate development and improve code quality.
 
 ## Features
 
+- **User Authentication**: Secure JWT-based authentication with user-specific data isolation
 - **Group Management**: Create and manage expense groups with descriptions
 - **Member Management**: Add/remove members from groups with email tracking
-- **Expense Tracking**: Record expenses with flexible split options
+- **Expense Tracking**: Record expenses in Indian Rupees (INR) with flexible split options
 - **Smart Settlements**: Automatically calculates optimal payment settlements to minimize transactions
 - **Balance Tracking**: Real-time balance calculations showing who owes whom
+- **Data Visualization**: Interactive charts showing spending by member, category, and trends over time
+- **Expense Categories**: Categorize expenses (Food, Travel, Utilities, Entertainment, Accommodation, Shopping, Other)
+- **CSV Export**: Export expense data for external analysis
 - **Three Split Types**:
   - **Equal**: Split evenly among selected members
   - **Percentage**: Custom percentage allocation (must sum to 100%)
@@ -20,15 +26,19 @@ A full-stack web application for managing shared expenses among group members. S
 - Node.js with Express
 - TypeScript
 - SQLite database with better-sqlite3
+- JWT authentication with bcrypt for password hashing
 - express-validator for input validation
 - CORS enabled for cross-origin requests
 
 ### Frontend
 - React 18 with TypeScript
 - Vite for build tooling and development server
+- Zustand for state management
+- React Context API for authentication
 - shadcn/ui component library (built on Radix UI)
 - Tailwind CSS v4 with CSS variables
 - React Router v6 for navigation
+- Recharts for data visualization
 - Lucide React for icons
 
 ## Project Structure
@@ -122,8 +132,13 @@ npm run preview
 
 ## API Endpoints
 
-### Groups
-- `GET /api/groups` - Get all groups
+### Authentication (Public)
+- `POST /api/auth/register` - Register a new user account
+- `POST /api/auth/login` - Login and receive JWT token
+- `GET /api/auth/me` - Get current user information (requires authentication)
+
+### Groups (Protected - requires authentication)
+- `GET /api/groups` - Get all groups for authenticated user
 - `POST /api/groups` - Create a new group
 - `GET /api/groups/:id` - Get group details with members and expenses
 - `PUT /api/groups/:id` - Update group information
@@ -131,13 +146,13 @@ npm run preview
 - `GET /api/groups/:id/balances` - Get balance summary for all members
 - `GET /api/groups/:id/settlements` - Get optimized settlement suggestions
 
-### Members
+### Members (Protected - requires authentication)
 - `POST /api/groups/:groupId/members` - Add member to group
 - `DELETE /api/groups/:groupId/members/:memberId` - Remove member from group
 
-### Expenses
+### Expenses (Protected - requires authentication)
 - `GET /api/expenses` - Get all expenses (supports `?groupId=` query parameter)
-- `POST /api/expenses` - Create new expense with split details
+- `POST /api/expenses` - Create new expense with split details (currency defaults to INR)
 - `GET /api/expenses/:id` - Get expense details
 - `PUT /api/expenses/:id` - Update expense
 - `DELETE /api/expenses/:id` - Delete expense
@@ -146,15 +161,14 @@ npm run preview
 
 The application uses SQLite with the following normalized schema:
 
-- **groups**: Stores group information (id, name, description, createdAt)
-- **members**: Individual member records (id, name, email, createdAt)
+- **users**: User accounts (id, email, name, password_hash, created_at)
+- **groups**: Stores group information (id, user_id, name, description, created_at)
+- **members**: Individual member records (id, name, email)
 - **group_members**: Junction table for group-member relationships
-- **expenses**: Expense records (id, groupId, description, amount, paidBy, date, splitType)
-- **split_details**: Individual split records (expenseId, memberId, amount)
+- **expenses**: Expense records (id, group_id, description, amount, currency, paid_by, split_type, category, date)
+- **split_details**: Individual split records (expense_id, member_id, amount)
 
-Foreign key constraints are enforced to maintain data integrity.
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed schema and design information.
+Foreign key constraints are enforced to maintain data integrity. Groups are associated with users for data isolation.
 
 ## Key Features Explained
 
@@ -197,13 +211,12 @@ The application uses a greedy algorithm to minimize the number of transactions n
 
 ## Future Enhancements
 
-- User authentication and authorization
-- Multi-currency support
-- Expense categories and tags
 - Receipt image uploads
-- Email notifications
-- Data export (CSV, PDF)
-- Mobile responsive design improvements
+- Email notifications for settlements
+- Data export to PDF format
+- Mobile app development
+- Push notifications
+- Multi-currency support (currently only INR)
 
 ## License
 
