@@ -75,6 +75,7 @@ export interface Expense {
   amount: number;
   currency: Currency;
   paidBy: string;
+  paidByName?: string;
   splitBetween: SplitDetail[];
   splitType: SplitType;
   category: ExpenseCategory;

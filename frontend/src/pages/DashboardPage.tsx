@@ -3,7 +3,7 @@ import { BarChart3, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navbar } from '@/components/Navbar';
 import { api } from '@/api/client';
-import { Expense, Member, Currency } from '@/types';
+import { Expense, Currency } from '@/types';
 import { formatCurrency } from '@/lib/currency';
 import { CategoryPieChart } from '@/components/dashboard/CategoryPieChart';
 import { MemberSpendingChart } from '@/components/dashboard/MemberSpendingChart';
@@ -11,7 +11,6 @@ import { SpendingTrendChart } from '@/components/dashboard/SpendingTrendChart';
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,18 +22,6 @@ export default function DashboardPage() {
       setLoading(true);
       const expensesData = await api.expenses.getAll();
       setExpenses(expensesData.expenses);
-
-      // Get all unique members from expenses
-      const uniqueMemberIds = new Set<string>();
-      expensesData.expenses.forEach(expense => {
-        uniqueMemberIds.add(expense.paidBy);
-        expense.splitBetween.forEach((split: { memberId: string }) => uniqueMemberIds.add(split.memberId));
-      });
-
-      // For demo, we'll use member IDs as names (in real app, fetch from API)
-      setMembers(
-        Array.from(uniqueMemberIds).map(id => ({ id, name: `Member ${id.slice(0, 4)}` }))
-      );
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -142,7 +129,7 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <CategoryPieChart expenses={expenses} />
-            <MemberSpendingChart expenses={expenses} members={members} />
+            <MemberSpendingChart expenses={expenses} />
             <div className="lg:col-span-2">
               <SpendingTrendChart expenses={expenses} />
             </div>

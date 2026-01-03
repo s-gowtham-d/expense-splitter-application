@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Expense, Member } from '@/types';
+import { Expense } from '@/types';
 import {
   BarChart,
   Bar,
@@ -13,27 +13,23 @@ import {
 
 interface MemberSpendingChartProps {
   expenses: Expense[];
-  members: Member[];
 }
 
-export function MemberSpendingChart({ expenses, members }: MemberSpendingChartProps) {
-  // Aggregate expenses by member
+export function MemberSpendingChart({ expenses }: MemberSpendingChartProps) {
+  // Aggregate expenses by member name
   const memberSpending = expenses.reduce((acc, expense) => {
-    const memberId = expense.paidBy;
-    if (!acc[memberId]) {
-      acc[memberId] = 0;
+    const memberName = expense.paidByName || 'Unknown';
+    if (!acc[memberName]) {
+      acc[memberName] = 0;
     }
-    acc[memberId] += expense.amount;
+    acc[memberName] += expense.amount;
     return acc;
   }, {} as Record<string, number>);
 
-  const chartData = Object.entries(memberSpending).map(([memberId, amount]) => {
-    const member = members.find(m => m.id === memberId);
-    return {
-      name: member?.name || memberId.slice(0, 8),
-      amount: Math.round(amount * 100) / 100,
-    };
-  });
+  const chartData = Object.entries(memberSpending).map(([name, amount]) => ({
+    name,
+    amount: Math.round(amount * 100) / 100,
+  }));
 
   // Sort by amount descending
   chartData.sort((a, b) => b.amount - a.amount);

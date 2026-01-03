@@ -63,6 +63,7 @@ export interface Expense {
   amount: number;
   currency: Currency;
   paidBy: string; // Member ID
+  paidByName?: string; // Member name for display
   splitBetween: SplitDetail[];
   splitType: SplitType;
   category: ExpenseCategory;

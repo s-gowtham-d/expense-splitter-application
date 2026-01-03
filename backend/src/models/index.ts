@@ -216,7 +216,12 @@ class DataStore {
   }
 
   getExpense(id: string): Expense | undefined {
-    const row = db.prepare('SELECT * FROM expenses WHERE id = ?').get(id) as any;
+    const row = db.prepare(`
+      SELECT e.*, m.name as paid_by_name
+      FROM expenses e
+      LEFT JOIN members m ON e.paid_by = m.id
+      WHERE e.id = ?
+    `).get(id) as any;
     if (!row) return undefined;
 
     const splits = db
@@ -230,6 +235,7 @@ class DataStore {
       amount: row.amount,
       currency: row.currency || 'USD',
       paidBy: row.paid_by,
+      paidByName: row.paid_by_name,
       splitType: row.split_type as SplitType,
       category: row.category,
       splitBetween: splits.map(s => ({
@@ -241,7 +247,12 @@ class DataStore {
   }
 
   getAllExpenses(): Expense[] {
-    const rows = db.prepare('SELECT * FROM expenses ORDER BY date DESC').all() as any[];
+    const rows = db.prepare(`
+      SELECT e.*, m.name as paid_by_name
+      FROM expenses e
+      LEFT JOIN members m ON e.paid_by = m.id
+      ORDER BY e.date DESC
+    `).all() as any[];
     return rows.map(row => {
       const splits = db
         .prepare('SELECT * FROM split_details WHERE expense_id = ?')
@@ -254,6 +265,7 @@ class DataStore {
         amount: row.amount,
         currency: row.currency || 'USD',
         paidBy: row.paid_by,
+        paidByName: row.paid_by_name,
         splitType: row.split_type as SplitType,
         category: row.category,
         splitBetween: splits.map(s => ({
@@ -266,9 +278,13 @@ class DataStore {
   }
 
   getExpensesByGroupId(groupId: string): Expense[] {
-    const rows = db
-      .prepare('SELECT * FROM expenses WHERE group_id = ? ORDER BY date DESC')
-      .all(groupId) as any[];
+    const rows = db.prepare(`
+      SELECT e.*, m.name as paid_by_name
+      FROM expenses e
+      LEFT JOIN members m ON e.paid_by = m.id
+      WHERE e.group_id = ?
+      ORDER BY e.date DESC
+    `).all(groupId) as any[];
 
     return rows.map(row => {
       const splits = db
@@ -282,6 +298,7 @@ class DataStore {
         amount: row.amount,
         currency: row.currency || 'USD',
         paidBy: row.paid_by,
+        paidByName: row.paid_by_name,
         splitType: row.split_type as SplitType,
         category: row.category,
         splitBetween: splits.map(s => ({
