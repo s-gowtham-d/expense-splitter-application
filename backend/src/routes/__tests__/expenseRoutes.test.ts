@@ -8,7 +8,7 @@ describe('Expense Routes Integration Tests', () => {
     dataStore.clearAll();
 
     // Create a test group with members
-    const group = dataStore.createGroup({
+    const group = dataStore.createGroup({ userId: "test-user",
       id: 'test-group-id',
       name: 'Test Group',
       description: 'Integration test group',
@@ -220,7 +220,7 @@ describe('Expense Routes Integration Tests', () => {
       const members = dataStore.getAllMembers();
 
       // Create second group
-      const group2 = dataStore.createGroup({
+      const group2 = dataStore.createGroup({ userId: "test-user",
         id: 'test-group-2',
         name: 'Group 2',
         description: 'Second group',

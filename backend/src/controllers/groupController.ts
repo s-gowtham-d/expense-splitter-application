@@ -5,7 +5,8 @@ import { CreateGroupRequest, UpdateGroupRequest } from '../types';
 
 export const createGroup = async (req: Request, res: Response): Promise<void> => {
   const data: CreateGroupRequest = req.body;
-  const group = groupService.createGroup(data);
+  const userId = req.user!.userId;
+  const group = groupService.createGroup(userId, data);
 
   res.status(201).json({
     status: 'success',
@@ -13,8 +14,9 @@ export const createGroup = async (req: Request, res: Response): Promise<void> =>
   });
 };
 
-export const getAllGroups = async (_req: Request, res: Response): Promise<void> => {
-  const groups = groupService.getAllGroups();
+export const getAllGroups = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user!.userId;
+  const groups = groupService.getAllGroups(userId);
 
   res.status(200).json({
     status: 'success',
@@ -24,7 +26,8 @@ export const getAllGroups = async (_req: Request, res: Response): Promise<void> 
 
 export const getGroupById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const group = groupService.getGroupById(id);
+  const userId = req.user!.userId;
+  const group = groupService.getGroupById(id, userId);
 
   // Get members details
   const members = dataStore.getMembersByIds(group.members);
@@ -44,8 +47,9 @@ export const getGroupById = async (req: Request, res: Response): Promise<void> =
 
 export const updateGroup = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
+  const userId = req.user!.userId;
   const data: UpdateGroupRequest = req.body;
-  const group = groupService.updateGroup(id, data);
+  const group = groupService.updateGroup(id, userId, data);
 
   res.status(200).json({
     status: 'success',
@@ -55,7 +59,8 @@ export const updateGroup = async (req: Request, res: Response): Promise<void> =>
 
 export const deleteGroup = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  groupService.deleteGroup(id);
+  const userId = req.user!.userId;
+  groupService.deleteGroup(id, userId);
 
   res.status(204).send();
 };

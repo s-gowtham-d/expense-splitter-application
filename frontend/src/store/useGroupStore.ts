@@ -11,6 +11,8 @@ interface GroupState {
 
   // Actions
   fetchGroupData: (groupId: string) => Promise<void>;
+  updateGroup: (groupId: string, data: { name?: string; description?: string }) => Promise<void>;
+  deleteGroup: (groupId: string) => Promise<void>;
   addMember: (groupId: string, data: { name: string; email?: string }) => Promise<void>;
   removeMember: (groupId: string, memberId: string) => Promise<void>;
   addExpense: (expense: any) => Promise<void>;
@@ -35,8 +37,18 @@ export const useGroupStore = create<GroupState>((set, get) => ({
         api.groups.getSettlements(groupId),
       ]);
 
+      // Merge group, members, and expenses into GroupWithDetails structure
+      const groupWithDetails: GroupWithDetails = {
+        id: groupData.group.id,
+        name: groupData.group.name,
+        description: groupData.group.description,
+        members: groupData.members,
+        expenses: groupData.expenses,
+        createdAt: groupData.group.createdAt,
+      };
+
       set({
-        group: groupData,
+        group: groupWithDetails,
         balances: balancesData.balances,
         settlements: settlementsData.settlements,
         loading: false,
@@ -44,6 +56,40 @@ export const useGroupStore = create<GroupState>((set, get) => ({
     } catch (error) {
       console.error('Failed to load group:', error);
       set({ error: 'Failed to load group details', loading: false });
+    }
+  },
+
+  updateGroup: async (groupId: string, data: { name?: string; description?: string }) => {
+    try {
+      await api.groups.update(groupId, data);
+      const { group } = get();
+
+      if (group) {
+        set({
+          group: {
+            ...group,
+            name: data.name ?? group.name,
+            description: data.description ?? group.description,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update group:', error);
+      throw error;
+    }
+  },
+
+  deleteGroup: async (groupId: string) => {
+    try {
+      await api.groups.delete(groupId);
+      set({
+        group: null,
+        balances: [],
+        settlements: [],
+      });
+    } catch (error) {
+      console.error('Failed to delete group:', error);
+      throw error;
     }
   },
 

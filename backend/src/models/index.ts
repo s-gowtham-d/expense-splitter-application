@@ -46,10 +46,10 @@ class DataStore {
   // Group operations
   createGroup(group: Group): Group {
     const stmt = db.prepare(`
-      INSERT INTO groups (id, name, description, created_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO groups (id, user_id, name, description, created_at)
+      VALUES (?, ?, ?, ?, ?)
     `);
-    stmt.run(group.id, group.name, group.description || null, group.createdAt.toISOString());
+    stmt.run(group.id, group.userId, group.name, group.description || null, group.createdAt.toISOString());
     return group;
   }
 
@@ -63,6 +63,7 @@ class DataStore {
 
     return {
       id: row.id,
+      userId: row.user_id,
       name: row.name,
       description: row.description,
       members: memberIds.map(m => m.member_id),
@@ -79,6 +80,25 @@ class DataStore {
 
       return {
         id: row.id,
+        userId: row.user_id,
+        name: row.name,
+        description: row.description,
+        members: memberIds.map(m => m.member_id),
+        createdAt: new Date(row.created_at),
+      };
+    });
+  }
+
+  getGroupsByUserId(userId: string): Group[] {
+    const rows = db.prepare('SELECT * FROM groups WHERE user_id = ? ORDER BY created_at DESC').all(userId) as any[];
+    return rows.map(row => {
+      const memberIds = db
+        .prepare('SELECT member_id FROM group_members WHERE group_id = ?')
+        .all(row.id) as any[];
+
+      return {
+        id: row.id,
+        userId: row.user_id,
         name: row.name,
         description: row.description,
         members: memberIds.map(m => m.member_id),

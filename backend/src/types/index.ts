@@ -44,6 +44,7 @@ export interface Member {
 
 export interface Group {
   id: string;
+  userId: string; // Owner of the group
   name: string;
   description?: string;
   members: string[]; // Array of member IDs

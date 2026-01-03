@@ -3,9 +3,10 @@ import { Group, CreateGroupRequest, UpdateGroupRequest } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { AppError } from '../middleware/errorHandler';
 
-export const createGroup = (data: CreateGroupRequest): Group => {
+export const createGroup = (userId: string, data: CreateGroupRequest): Group => {
   const group: Group = {
     id: generateId(),
+    userId,
     name: data.name,
     description: data.description,
     members: [],
@@ -15,22 +16,34 @@ export const createGroup = (data: CreateGroupRequest): Group => {
   return dataStore.createGroup(group);
 };
 
-export const getAllGroups = (): Group[] => {
-  return dataStore.getAllGroups();
+export const getAllGroups = (userId: string): Group[] => {
+  return dataStore.getGroupsByUserId(userId);
 };
 
-export const getGroupById = (id: string): Group => {
+export const getGroupById = (id: string, userId: string): Group => {
+  const group = dataStore.getGroup(id);
+
+  if (!group) {
+    throw new AppError(404, 'Group not found');
+  }
+
+  // Verify ownership
+  if (group.userId !== userId) {
+    throw new AppError(403, 'Access denied');
+  }
+
+  return group;
+};
+
+export const updateGroup = (id: string, userId: string, data: UpdateGroupRequest): Group => {
   const group = dataStore.getGroup(id);
   if (!group) {
     throw new AppError(404, 'Group not found');
   }
-  return group;
-};
 
-export const updateGroup = (id: string, data: UpdateGroupRequest): Group => {
-  const group = dataStore.getGroup(id);
-  if (!group) {
-    throw new AppError(404, 'Group not found');
+  // Verify ownership
+  if (group.userId !== userId) {
+    throw new AppError(403, 'Access denied');
   }
 
   const updatedGroup = dataStore.updateGroup(id, {
@@ -45,10 +58,15 @@ export const updateGroup = (id: string, data: UpdateGroupRequest): Group => {
   return updatedGroup;
 };
 
-export const deleteGroup = (id: string): void => {
+export const deleteGroup = (id: string, userId: string): void => {
   const group = dataStore.getGroup(id);
   if (!group) {
     throw new AppError(404, 'Group not found');
+  }
+
+  // Verify ownership
+  if (group.userId !== userId) {
+    throw new AppError(403, 'Access denied');
   }
 
   // Delete all expenses associated with this group

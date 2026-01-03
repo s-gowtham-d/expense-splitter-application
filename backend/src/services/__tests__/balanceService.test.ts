@@ -25,6 +25,7 @@ describe('BalanceService', () => {
         { id: 'member3', name: 'Charlie', email: 'charlie@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',
@@ -69,6 +70,7 @@ describe('BalanceService', () => {
         { id: 'member2', name: 'Bob', email: 'bob@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',
@@ -134,6 +136,7 @@ describe('BalanceService', () => {
         { id: 'member2', name: 'Bob', email: 'bob@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',
@@ -177,6 +180,7 @@ describe('BalanceService', () => {
         { id: 'member2', name: 'Bob', email: 'bob@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',
@@ -225,6 +229,7 @@ describe('BalanceService', () => {
         { id: 'member3', name: 'Charlie', email: 'charlie@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',
@@ -269,6 +274,7 @@ describe('BalanceService', () => {
         { id: 'member2', name: 'Bob', email: 'bob@example.com' },
       ];
       const group: Group = {
+        userId: "test-user",
         id: groupId,
         name: 'Test Group',
         description: 'Test',

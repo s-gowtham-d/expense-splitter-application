@@ -56,6 +56,7 @@ export interface Member {
 
 export interface Group {
   id: string;
+  userId: string;
   name: string;
   description?: string;
   members: string[];

@@ -9,6 +9,7 @@ export const createMember = (data: AddMemberRequest): Member => {
     name: data.name,
     email: data.email,
   };
+  console.log(member)
 
   return dataStore.createMember(member);
 };

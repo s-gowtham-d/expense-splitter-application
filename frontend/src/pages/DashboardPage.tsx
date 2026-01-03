@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Navbar } from '@/components/Navbar';
 import { api } from '@/api/client';
 import { Expense, Member, Currency } from '@/types';
 import { formatCurrency } from '@/lib/currency';
@@ -60,6 +61,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>

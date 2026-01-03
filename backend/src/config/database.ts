@@ -24,11 +24,20 @@ export const initializeDatabase = (): void => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS groups (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
       name TEXT NOT NULL,
       description TEXT,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
+
+  // Add user_id column if it doesn't exist (for existing databases)
+  try {
+    db.exec(`ALTER TABLE groups ADD COLUMN user_id TEXT`);
+  } catch (error) {
+    // Column already exists, ignore error
+  }
 
   // Members table
   db.exec(`

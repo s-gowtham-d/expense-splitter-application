@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Navbar } from '@/components/Navbar';
 import { api } from '@/api/client';
 import { Group } from '@/types';
 
@@ -73,6 +74,7 @@ export default function GroupsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>

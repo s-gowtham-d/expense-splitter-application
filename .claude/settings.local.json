@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm run build)",
       "Bash(npm install:*)",
-      "Bash(npm init:*)"
+      "Bash(npm init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add expense categories functionality\n\nBackend changes:\n- Add ExpenseCategory enum with 7 categories \\(food, travel, utilities, entertainment, accommodation, shopping, other\\)\n- Update Expense interface to include category field\n- Add category column to expenses table schema with migration support\n- Update expense service to handle category in create/update operations\n- Set default category to ''other'' for new expenses\n\nFrontend changes:\n- Add ExpenseCategory enum to frontend types\n- Add category selector to add expense form\n- Add category selector to edit expense form\n- Display category in expense list\n- Include category in all expense API calls\n\nThis implements the bonus feature from the assignment requirements.\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }
